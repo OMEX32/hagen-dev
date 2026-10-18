@@ -1,0 +1,1 @@
+export default function Loading() { return <main className="status-page" role="status"><div className="brand-mark" aria-hidden="true">h</div><h1>Getting your space ready…</h1><p className="muted">One moment.</p></main>; }
