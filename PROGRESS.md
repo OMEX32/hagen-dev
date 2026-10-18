@@ -2,9 +2,9 @@
 
 ## Current state — 2026-10-18
 
-Milestone 0 is accepted. Milestone 1 foundation source is prepared, but the milestone is **not complete or accepted**. Dependencies are now installed and package-lock.json exists. Provider integration, security audit review, and full verification remain pending. No application has been deployed.
+Milestone 0 is accepted. The user has reviewed working milestone 1 account/profile/target/recovery flows and explicitly authorized milestone 2. Food source, migration, and test suites are prepared. Type check/lint, 42 Vitest cases, 5 native-domain cases, and the webpack production build pass. Food database migration and actual SQL/browser verification are still pending; do not call milestone 2 complete. Foundation automated isolation/session-expiry checks also remain outstanding.
 
-Read PROJECT_PROMPT.md, PLAN.md, this file, and README.md before continuing. Preserve milestone review gates. Do not start food/training/progress features yet.
+Read PROJECT_PROMPT.md, PLAN.md, this file, and README.md before continuing. Preserve milestone review gates. Milestone 2 is authorized. Do not start training/progress features yet.
 
 ## Working directory and continuity
 
@@ -67,3 +67,55 @@ Audit triage is recorded below: the known development-only braces issue has no p
 - Confirmed every package in that chain has dev=true in package-lock.json. `npm ls braces micromatch fast-glob --omit=dev` returns an empty dependency tree. This finding is in the development lint dependency chain; this does not certify all runtime dependencies as vulnerability-free.
 - npm’s proposed forced fix downgrades eslint-config-next to 14.2.35, mismatching the Next.js 16 project. No downgrade, unsupported override, audit suppression, or removal of lint checks was applied. No published patched braces version is available to adopt from the advisory.
 - Local development may proceed with the known tooling issue recorded. Reassess a compatible upstream fix and rerun the full audit when available. No code changed during this triage, so previously passing checks were not rerun.
+
+## Deployed signup configuration diagnosis — 2026-10-18
+
+- User reports Supabase is connected and confirms the failing form is Create account on the Vercel website. User supplied server error: `Set NEXT_PUBLIC_APP_URL in .env.local.` This confirms the missing app-origin variable in the deployed environment; no provider credentials or logs were collected.
+- Signup previously threw while constructing its confirmation URL, before the Supabase signUp request. The browser caught that as a generic failed-save message. The text mentioning .env.local was misleading on Vercel.
+- Added explicit configuration-error results before creating a Supabase client for signup and password reset. Inputs remain intact and malformed/missing app origins cause no account-creation request. Eight regression cases cover missing/invalid origins, expected HTTPS signup links, and the recovery destination.
+- `npm test`: 18 cases passed. Type check and lint passed. No changes have been committed, pushed, or deployed by the agent.
+- Required hosted fix: add NEXT_PUBLIC_APP_URL with the exact stable HTTPS app origin to the Vercel deployment environment, save, and redeploy. Match Site URL and exact callback allowlist entries in Supabase. No database migration is needed for this configuration error; onboarding persistence still requires the existing foundation migration.
+
+## User confirms hosted app loads — 2026-10-18, 17:15 Europe/Brussels
+
+- After creating the GitHub repository (`OMEX32/hagen-dev`), deploying through Vercel, connecting Supabase, correcting the app-origin/email redirect setup, and receiving the foundation SQL migration instructions, the user reports: “great, it works now.”
+- Treat the deployed page-loading blocker as resolved according to the user. The agent has not independently inspected the hosted database or deployment.
+- Next user-facing check: complete onboarding, save the starting plan, refresh, sign out, and sign back in to confirm the same profile and targets load. This is still unverified.
+- Milestone 1 remains open for the outstanding provider-backed acceptance checks. Milestone 2 has not been approved or started.
+
+## Saved-plan persistence confirmed by user — 2026-10-18, 17:17 Europe/Brussels
+
+- User confirms profile and targets are still present after the requested refresh/sign-out/sign-in check: “yeah there here. all works fine.” Mark this user-observed persistence check as passed.
+- Hosted page loading, onboarding save, refresh persistence, and re-login persistence are now confirmed by the user. No independent database/browser inspection was performed by the agent.
+- Next user-facing foundation check is password recovery: request a reset email, follow its link on the hosted origin, change the password, and sign in again. Session-refresh/expiry and two-account isolation checks also remain unverified.
+- Do not label milestone 1 fully verified or begin milestone 2 solely from this persistence confirmation.
+
+## Password recovery confirmed by user — 2026-10-18, 17:19 Europe/Brussels
+
+- User confirms the requested password-reset workflow works: request email, follow the link in the same browser, set a new password, and sign in. Mark this user-observed account-flow check as passed.
+- User-confirmed flows now include hosted app loading, onboarding save, refresh/re-login persistence, and password recovery.
+- Automated provider-backed session-expiry/refresh, two-account data isolation, and browser/mobile acceptance checks remain unverified. Do not describe milestone 1 as fully verified.
+- The next feature milestone proposed for user approval is milestone 2: manual food logging and real Today calorie/protein summaries. No milestone 2 implementation has started.
+
+## Milestone 2 authorized and source prepared — 2026-10-18
+
+- User explicitly approved the proposed Food milestone with “lets start.” The earlier instruction not to begin milestone 2 is superseded by this authorization; remaining foundation automation gaps stay recorded.
+- Added food logs, reusable foods, saved meals/items, diary-completion records, private request receipts, owner read policies, owner-consistent foreign keys, calculated numeric nutrition snapshots, authenticated transactional food writes, and atomic completion invalidation in `202610180002_food.sql`.
+- Added the Food tab, dated diary with four categories, quick/scaled entry/edit/delete, recent reuse, category copying, saved food and meal CRUD/logging, editable multi-item templates, and completion/reopening. Enabled only Today and Food; Training/Progress remain unavailable.
+- Connected Today and Food to shared real logged totals and date-effective targets. Empty incomplete days remain unknown, complete empty diaries are explicit zeros, partial diaries are labelled, and over-target amounts are preserved neutrally. No invented nutrition or exercise calorie credits.
+- Added account-scoped sessionStorage drafts for unsent food forms, cleared on save/sign-in screen, plus pending/double-submit/failure retention. Database remains the durable source of truth. Drafts are not an offline write queue.
+- Added a migration notice when food tables are missing, preserving access to existing foundation targets rather than showing invented totals.
+- Added 24 food calculation/validation/rendering/pagination cases; all 42 Vitest cases now pass. All 5 native-domain cases pass. Type check and zero-warning lint pass. `npm run build -- --webpack` passes with all Food routes compiled.
+- During verification, running type generation concurrently with build caused transient missing `.next/types` files because build rewrites that directory. Re-ran type checking sequentially after build; it passes. Do not repeat those two commands concurrently.
+- Wrote rollback-only `supabase/tests/food.sql`: synthetic accounts, authenticated/anonymous role checks, scaling, retries, changed retry payloads, snapshots, completion/moved dates, deletes, copies, meal rollback, ownership/attachment checks, and account cascade. It has NOT been run on PostgreSQL. No test database credentials or running local Docker engine are available.
+- Wrote a Playwright food scenario for CRUD, reload, cross-navigation draft retention, failed-save retry, completion invalidation, category copy, saved label scaling/history, and phone overflow. Scenario discovery succeeds (6 cases across Chromium/WebKit); execution fails before browser startup because this session cannot listen on 127.0.0.1:3100 (EPERM). No browser, Safari, or physical iPhone claim is made.
+- No new dependency or lockfile change was needed. No migration was applied to the user's Supabase, and no commit/push/deployment was performed by the agent. Existing uncommitted signup configuration fixes/tests from the earlier session remain in the workspace.
+
+## Next action for milestone 2 review
+
+1. Apply **only** `supabase/migrations/202610180002_food.sql` once in the existing Hagen development Supabase SQL Editor. Keep foundation data intact. README has the Mac pbcopy command.
+2. Run the rollback-only SQL suite in a disposable project with both migrations, then reconcile actual generated database types. Record real results; do not assume source inspection proves ownership/atomicity.
+3. Inspect/commit/push the source update from the user terminal; this session cannot write .git. The user's GitHub-linked Vercel deployment must complete before the Food UI appears online.
+4. Complete provider-backed browser checks and user review of logging/editing/deletion, Food/Today reload consistency, diary invalidation, meal copies, and immutable saved-food history. Keep milestone 2 unchecked until those checks pass. No milestone 3 work has begun.
+
+- Final read-path review added paginated food/library reads to avoid truncating totals at the provider row cap, and limits target lookup to the most recent version effective on the selected day. Added two pagination/failure tests; 42 Vitest + 5 native tests now pass. Food mutations explicitly revalidate Today, Food, and the library.

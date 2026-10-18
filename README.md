@@ -2,7 +2,7 @@
 
 Private, mobile-first fitness diary built with Next.js App Router, React, strict TypeScript, Tailwind, and Supabase Auth/PostgreSQL.
 
-Milestone 1 source and installed dependencies are present. Provider setup and full acceptance checks are still pending; this is not a deployed or verified finished app. No Vercel or Supabase project existed when this checkout started. Read `PROJECT_PROMPT.md`, `PLAN.md`, and `PROGRESS.md` before continuing. Later milestones require review before implementation.
+Milestones 1 and 2 source and installed dependencies are present. The user has deployed the foundation to Vercel and confirmed onboarding, persistence, and password recovery. Food integration and full automated acceptance are still pending; this is not a verified finished app. Both provider projects were created from scratch. Read `PROJECT_PROMPT.md`, `PLAN.md`, and `PROGRESS.md` before continuing. Later milestones require review before implementation.
 
 ## Run locally
 
@@ -118,4 +118,69 @@ supabase/migrations/     Versioned SQL foundation
 tests/                   Domain, validation, database, and browser checks
 ```
 
-No food, training, progress, backup/restore, or PWA milestone has been implemented.
+Milestone 2 food code is prepared; apply its migration and complete integration verification before calling it accepted. Training, progress, backup/restore, and PWA features remain unimplemented.
+
+
+## Milestone 2: food diary and nutrition summaries
+
+The user authorized milestone 2 on 2026-10-18 after confirming foundation save/re-login and password recovery. Food code is prepared, but the new migration and real provider/browser checks are not yet verified. Do not begin training automatically.
+
+### Apply the food database update
+
+Apply **only** `supabase/migrations/202610180002_food.sql` to the existing Hagen development Supabase project in SQL Editor. The foundation migration must already be present. This update adds new food tables/functions and preserves existing profiles, targets, and Auth accounts. Run the whole migration once; it is transactional and deliberately does not drop/recreate existing tables. Do not rerun the foundation migration.
+
+On the Mac, copy the new SQL:
+
+```sh
+pbcopy < /Users/hassanainaljazzar/Documents/ChatGPT/Hagen/supabase/migrations/202610180002_food.sql
+```
+
+Paste into **Supabase → SQL Editor → New query** and Run. If it errors, inspect the error before retrying. The migration notifies PostgREST to refresh its schema. Refresh the app after success. The Food routes and Today show a setup notice when the food tables are absent rather than presenting invented zero totals.
+
+### Publish the source update
+
+No commit, push, or deployment was performed by the agent. This workspace now belongs to the user's GitHub-backed project. Inspect `git status`, then from this folder:
+
+```sh
+git add src tests supabase README.md PLAN.md PROGRESS.md
+git commit -m "Add food diary and daily nutrition summaries"
+git push
+```
+
+This also includes the previously uncommitted auth configuration diagnostics and their regression tests. The generated next-env.d.ts may differ after Next type generation; inspect it separately. The GitHub-linked Vercel deployment must finish before the new UI appears online. Do not commit .env.local/.env.test or service keys. Deployment configuration and remote access remain managed by the user.
+
+### What is implemented in source
+
+- `/food`: date navigation, Breakfast/Lunch/Dinner/Snacks, individual entries, explicit delete confirmation, meal-category copy to another date, recent-entry reuse, and diary completion/reopening.
+- `/food/entry`: quick total or per-100-g/per-serving entry; date/category, quantity, serving description, preparation, notes, and editing of the entry's saved snapshot.
+- `/food/library`: own saved food labels and editable saved meals. Saved meals support 1–50 nutrition items. A diary meal category can be turned into a template, then adjusted before saving.
+- `/food/library/log`: log a labelled amount or a fraction/multiple of a saved meal. Database-calculated numeric snapshots retain the values effective at logging time. Changing or removing a definition does not rewrite logged food.
+- `/today`: the same real diary totals and historically effective food/protein targets. Remaining values can be negative and are labelled neutrally as amounts over target. Empty incomplete days show unknown intake; explicitly completed empty days are recorded as zero totals.
+- Nutrition inputs accept zero, reject blank/negative/non-finite values, and retain up to three label decimal places. Quantity snapshots preserve additional precision when scaling meals. Display formatting does not rewrite stored values.
+- Every food write derives ownership from auth.uid(), checks the verified session at the server action, and uses the same per-user transaction lock. Direct client writes are denied. Composite owner foreign keys protect saved-food/saved-meal references.
+- Successful requests have idempotency receipts. Same-payload retries return the original result; changed payloads using an already-applied key produce an explicit refresh instruction. Multi-item meal expansion, completion invalidation, and receipts commit together.
+- Editing/moving/deleting/inserting diary entries reopens the affected dates atomically. Completion requires a user confirmation and cannot be set for future dates. Account cascade deletion does not recreate diary records.
+- Account-scoped unsent food-form drafts use sessionStorage in the current browser tab, when available, and clear on save or when the sign-in screen opens. This is draft retention, not an offline write queue or database. Failure states keep form values and do not claim successful saves.
+
+### Verify food database behavior
+
+`supabase/tests/food.sql` is a complete rollback-only SQL test script for a **disposable test project** with both migrations applied. It creates two synthetic accounts inside one transaction, switches to authenticated and anonymous roles, tests calculations, retry behavior, immutable snapshots, completion/moving/deletion, copies, atomic meal failure, cross-account read/write/attachment denial, anonymous denial, and account-deletion cascades, then rolls back. It sends no email and is not a live-data test. Run the complete script in that test project's SQL Editor. With psql, use `psql -v ON_ERROR_STOP=1 -f supabase/tests/food.sql` against the disposable test database. The success row is emitted only inside the healthy test transaction, before rollback.
+
+This SQL suite has **not been executed** in the authoring session: no test database is configured and the local Docker engine is stopped. Do not treat source inspection as a passing database isolation test. Reconcile generated database types after applying both migrations; the checked-in contract remains hand-authored.
+
+### Verify browser behavior
+
+The Playwright food scenario covers create/edit/delete, reload, draft retention across navigation, failed-network retention/retry, diary completion invalidation, meal-category copying, saved-food scaling, immutable logged snapshots, and phone-width overflow. It requires the disposable `.env.test` provider and the food migration. Synthetic food records remain only in disposable account A for inspection; delete the test account afterward. The existing foundation database suite still requires fresh accounts for reruns.
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run test:domain
+npm run build -- --webpack
+node --env-file=.env.test node_modules/@playwright/test/cli.js test
+```
+
+The authoring session passes type checking, lint, 42 Vitest cases, 5 native-domain cases, and the supported webpack production build. Playwright discovers all 6 configured browser scenarios, but execution is blocked by `listen EPERM 127.0.0.1:3100` before opening a browser. No mobile layout, physical iPhone, real food database write, or two-account SQL result was verified by the agent. Default Turbopack is separately blocked by the same session port restriction. Do not run type generation and build concurrently because both write `.next`.
+
+For user review after deployment: log a real label/quick entry, compare Food and Today, refresh, mark a diary complete, edit one entry and confirm it reopens, reuse/copy a meal, edit a saved definition and confirm previous logs stay unchanged. Record results in PROGRESS.md and stop for milestone 2 acceptance.

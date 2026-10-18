@@ -11,7 +11,7 @@ export function publicConfig() {
 
 export function appOrigin() {
   const value = process.env.NEXT_PUBLIC_APP_URL;
-  if (!value) throw new Error("Set NEXT_PUBLIC_APP_URL in .env.local.");
+  if (!value) throw new Error("Set NEXT_PUBLIC_APP_URL in your environment: .env.local for local development, or project environment variables for Vercel.");
   const url = new URL(value);
   if (url.pathname !== "/" || url.search || url.hash || url.username || url.password ||
       (url.protocol !== "https:" && !(url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname)))) {

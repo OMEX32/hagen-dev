@@ -16,9 +16,14 @@ export async function authenticate(data: FormData): Promise<FormResult> {
   const schema = z.object({ email: emailSchema, password: mode === "signup" ? passwordSchema : z.string().min(1, "Enter your password.").max(128) });
   const parsed = schema.safeParse(Object.fromEntries(data));
   if (!parsed.success) return { error: "Check the highlighted fields.", fields: z.flattenError(parsed.error).fieldErrors };
+  let emailRedirectTo: string | undefined;
+  if (mode === "signup") {
+    try { emailRedirectTo = `${appOrigin()}/auth/callback`; }
+    catch { return { error: "Account setup is incomplete. Set NEXT_PUBLIC_APP_URL to this website’s address, then restart or redeploy Hagen." }; }
+  }
   const supabase = await createClient();
   if (mode === "signup") {
-    const { data: result, error } = await supabase.auth.signUp({ ...parsed.data, options: { emailRedirectTo: `${appOrigin()}/auth/callback` } });
+    const { data: result, error } = await supabase.auth.signUp({ ...parsed.data, options: { emailRedirectTo } });
     if (error) return { error: "Couldn’t create the account. Try again shortly or sign in if you already registered." };
     if (!result.session) return { message: "Check your email to confirm your account, then return to sign in." };
   } else {
@@ -31,8 +36,11 @@ export async function authenticate(data: FormData): Promise<FormResult> {
 export async function requestPasswordReset(data: FormData): Promise<FormResult> {
   const parsed = z.object({ email: emailSchema }).safeParse(Object.fromEntries(data));
   if (!parsed.success) return { fields: z.flattenError(parsed.error).fieldErrors, error: "Check your email address." };
+  let redirectTo: string;
+  try { redirectTo = `${appOrigin()}/auth/callback?next=/update-password`; }
+  catch { return { error: "Password reset isn’t configured. Set NEXT_PUBLIC_APP_URL to this website’s address, then restart or redeploy Hagen." }; }
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo: `${appOrigin()}/auth/callback?next=/update-password` });
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo });
   if (error) return { error: "Couldn’t request a reset. Wait a moment and try again." };
   return { message: "If that address has an account, a reset link is on its way. Open it in this browser." };
 }

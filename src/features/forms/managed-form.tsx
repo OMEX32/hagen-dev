@@ -6,14 +6,15 @@ import type { FormResult } from "./types";
 
 const Errors = createContext<FormResult["fields"]>({});
 
-export function ManagedForm({ action, children, submitLabel, pendingLabel = "Saving…", className = "" }: {
+export function ManagedForm({ action, children, submitLabel, pendingLabel = "Saving…", className = "", onValuesChange }: {
   action: (data: FormData) => Promise<FormResult>; children?: ReactNode;
   submitLabel: string; pendingLabel?: string; className?: string;
+  onValuesChange?: (data: FormData) => void;
 }) {
   const [result, setResult] = useState<FormResult>({});
   const [pending, startTransition] = useTransition();
   const submitting = useRef(false);
-  return <form className={`form-stack ${className}`} onSubmit={(event) => {
+  return <form className={`form-stack ${className}`} onChange={(event) => onValuesChange?.(new FormData(event.currentTarget))} onSubmit={(event) => {
     event.preventDefault();
     if (submitting.current) return;
     submitting.current = true;

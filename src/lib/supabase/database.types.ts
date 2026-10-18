@@ -1,6 +1,7 @@
-// Hand-authored contract for milestone 1. Regenerate from the applied database
+// Hand-authored contract for milestones 1 and 2. Regenerate from the applied database
 // with the README command before accepting provider integration.
 import type { Target } from "@/lib/targets";
+import type { FoodLog, SavedFood, SavedMeal, SavedMealItem, DiaryDay } from "@/features/food/types";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 export type Profile = {
@@ -18,12 +19,17 @@ export type Profile = {
 type Table<Row> = { Row: Row; Insert: Partial<Row>; Update: Partial<Row>; Relationships: [] };
 export type Database = {
   public: {
-    Tables: { profiles: Table<Profile>; target_history: Table<Target & { request_id: string }> };
+    Tables: {
+      profiles: Table<Profile>; target_history: Table<Target & { request_id: string }>;
+      food_logs: Table<FoodLog>; saved_foods: Table<SavedFood>; saved_meals: Table<SavedMeal>;
+      saved_meal_items: Table<SavedMealItem>; food_diary_days: Table<DiaryDay>;
+    };
     Views: { [_ in never]: never };
     Functions: {
       complete_onboarding: { Args: { p_profile: Json; p_target: Json; p_request_id: string }; Returns: undefined };
       update_profile: { Args: { p_profile: Json }; Returns: undefined };
       schedule_target: { Args: { p_target: Json; p_effective_date: string; p_request_id: string }; Returns: undefined };
+      food_write: { Args: { p_action: string; p_data: Json; p_request_id: string }; Returns: string | null };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

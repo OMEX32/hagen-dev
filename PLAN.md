@@ -1,6 +1,6 @@
 # Hagen implementation plan
 
-Status: milestone 0 accepted by the user’s 2026-10-18 instruction to begin milestone 1. Foundation source is prepared in this workspace; dependencies and the lockfile are now present; provider integration, security audit review, default Turbopack verification, and full acceptance checks remain pending. The supported webpack production build passes.
+Status: milestone 1 core flows accepted by user review; provider automation/ownership acceptance remains unverified. The user explicitly authorized milestone 2 on 2026-10-18 at 17:19 Europe/Brussels. Food source is prepared; its new migration, SQL ownership suite, and browser verification are pending.
 Authoritative product requirements: PROJECT_PROMPT.md. Read this file and PROGRESS.md before resuming.
 
 ## Product and user journeys
@@ -15,7 +15,7 @@ Hagen is a personal mobile fitness diary with durable private records. It answer
 
 ## Proposed architecture
 
-- One Next.js App Router application with React, strict TypeScript, Tailwind CSS, and npm lockfile. Verify the current stable compatible versions immediately before milestone 1 installation; no packages exist yet. Current official Next.js installation documentation displays v16.4.2 and requires Node >=20.9. Local Node is v24.13.1; npm is 11.8.0.
+- One Next.js App Router application with React, strict TypeScript, Tailwind CSS, and npm lockfile. Installed versions and the npm lockfile are present; verify compatibility before future upgrades. Current official Next.js installation documentation displays v16.4.2 and requires Node >=20.9. Local Node is v24.13.1; npm is 11.8.0.
 - Supabase Auth for email/password registration, verification, sign-in, recovery, and sign-out. Use @supabase/ssr and @supabase/supabase-js, cookie-based sessions, the supported server identity verification method, and version-appropriate session refresh integration.
 - Supabase PostgreSQL for durable records, SQL migrations, generated TypeScript database types, and Row Level Security. Use the authenticated user's Supabase client for routine access; privileged credentials are unnecessary in ordinary diary requests.
 - Vercel application hosting plus Supabase through its Marketplace integration. Reuse suitable existing projects. Separate development/preview data from production. Check current regions, limits, and costs before choosing/provisioning services; no paid service is proposed at this stage.
@@ -52,13 +52,13 @@ Create only the tables needed by the approved milestone. Use transactions/databa
 ## Milestones and acceptance criteria
 
 - [x] 0 — Planning and review: preserve the complete brief; inspect existing work and tooling; propose stack, relationships, review gates and blockers. User reviews before scaffolding.
-- [ ] 1 — Foundation: project setup, suitable Supabase/Vercel connection, environment documentation, profile/target migrations, protected mobile shell, auth/recovery, onboarding and settings.
+- [ ] 1 — Foundation (user-reviewed core flows; automated provider acceptance pending): project setup, suitable Supabase/Vercel connection, environment documentation, profile/target migrations, protected mobile shell, auth/recovery, onboarding and settings.
   - Auth redirects and session refresh work; sign-out removes access and recovery changes the password through the provider flow.
   - Confirmed onboarding inputs and editable provisional targets survive refresh and re-login. Target updates are prospective and historical target resolution is tested.
   - Two real test accounts cannot read, modify, delete, or attach to each other's records; unauthenticated requests are blocked.
   - Phone layout works from 360 px with labelled forms, focus states, safe-area spacing and useful saving/failure states. Later tabs remain unavailable.
   - Type check, lint, foundation tests, auth browser checks, and production build pass. Record checks actually run; real provider access is required for full acceptance.
-- [ ] 2 — Food and Today: quick entry and reusable nutrition, saved meals, create/edit/delete/copy/recent workflows, diary completion, and real daily nutrition cards.
+- [ ] 2 — Food and Today (authorized; source prepared, integration verification pending): quick entry and reusable nutrition, saved meals, create/edit/delete/copy/recent workflows, diary completion, and real daily nutrition cards.
   - Label-based scaling is correct; nutrition snapshots preserve history; zero values are accepted while invalid quantities/numbers are rejected.
   - Totals update across views and after reload. Above-target intake displays the real amount over; incomplete or missing logs are clearly distinguished.
   - Duplicate submissions are safe. Editing a completed diary marks it incomplete atomically; copies are independent records.
@@ -80,11 +80,13 @@ Milestone 1 is the proposed first implementation milestone. Split it into a smal
 
 ## Blockers and next action
 
-1. The authorized working directory is now `/Users/hassanainaljazzar/Documents/ChatGPT/Hagen`. Planning files were copied from `/Users/hassanainaljazzar/Documents/Codex/2026-10-18/new-chat-5/Hagen`. The writable-workspace blocker is resolved; no Desktop directory needs to be opened.
-2. The user installed packages and generated package-lock.json. Type check, lint, 10 Vitest cases, and 5 domain cases pass after configuration fixes. The user’s audit report was reviewed: five propagated findings from one unpatched development-only braces issue (GHSA-vfj7-8cjw-p6xm). No compatible published patch is identified; retain this finding and reassess upstream. Avoid the suggested forced downgrade to Next lint config 14.2.35. The agent audit endpoint still fails with ENOTFOUND. The webpack production build passes; default Turbopack is blocked by this session’s port restrictions. Provider/browser checks remain pending.
-3. No Vercel or Supabase project is connected or provisioned. Follow README.md for fresh Marketplace setup, migration, public connection values, redirects, and email configuration. Keep private credentials out of chat. Confirm live service limits, European regions, and costs before provisioning or paid commitments.
-4. Docker is installed but its engine is not running. No local Supabase/database instance was available as a verification alternative.
-5. Finish milestone 1 acceptance with actual auth/recovery/session-refresh, persistence, two-account isolation, browser/mobile checks, and the production build. Milestone 1 remains unchecked. No public deployment has occurred or been authorized. Do not advance to milestone 2 before review.
+1. The authorized working directory is `/Users/hassanainaljazzar/Documents/ChatGPT/Hagen`, now GitHub-backed by the user's `OMEX32/hagen-dev` repository. Planning files were copied here from the staged Codex workspace. No further Desktop move is needed.
+2. User has deployed to Vercel, connected Supabase, applied the foundation migration, configured the app/email redirect origins, and confirmed onboarding, persistence, sign-out/re-login, and password recovery. These are user-observed results; automated provider/session-expiry and two-account foundation checks remain outstanding.
+3. Milestone 2 implementation is prepared. Apply **only** `supabase/migrations/202610180002_food.sql` to the existing development project, then publish the source update through the user's GitHub/Vercel workflow. No food migration, commit, push, or deployment has been executed by the agent.
+4. Type check, lint, 42 Vitest cases, 5 native-domain cases, and the supported webpack production build pass. Browser scenario discovery passes; actual browser execution is blocked by `listen EPERM 127.0.0.1:3100`. No real food database or physical phone check ran.
+5. Run `supabase/tests/food.sql` against a disposable test project with both migrations, and run the provider-backed Playwright flows with disposable accounts. The local Docker engine is stopped and test provider credentials are not configured in this workspace.
+6. Known development-only braces advisory and unsupported ESLint 9 remain documented in PROGRESS.md/README.md. Do not apply npm's forced downgrade or hide findings.
+7. Record provider/browser/user review results and keep milestone 2 open until its acceptance criteria pass. Milestone 3 training is not approved. Do not run `.next` type generation concurrently with a build.
 
 ## Official references checked on 2026-10-18
 
