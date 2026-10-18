@@ -1,6 +1,6 @@
 # Hagen implementation plan
 
-Status: milestone 1 core flows accepted by user review; provider automation/ownership acceptance remains unverified. The user explicitly authorized milestone 2 on 2026-10-18 at 17:19 Europe/Brussels. Food source is prepared; its new migration, SQL ownership suite, and browser verification are pending.
+Status: milestone 1 core flows accepted by user review; provider automation/ownership acceptance remains unverified. The user explicitly authorized milestone 2 on 2026-10-18 at 17:19 Europe/Brussels. The user reports Food/Today works after the migration/deployment instructions; milestone 2 user review passed. Independent SQL ownership/browser verification remains pending. The user explicitly authorized milestone 3 on 2026-10-18 with “lets start”. Training source, migration and tests are prepared; provider acceptance and user review are pending.
 Authoritative product requirements: PROJECT_PROMPT.md. Read this file and PROGRESS.md before resuming.
 
 ## Product and user journeys
@@ -58,12 +58,12 @@ Create only the tables needed by the approved milestone. Use transactions/databa
   - Two real test accounts cannot read, modify, delete, or attach to each other's records; unauthenticated requests are blocked.
   - Phone layout works from 360 px with labelled forms, focus states, safe-area spacing and useful saving/failure states. Later tabs remain unavailable.
   - Type check, lint, foundation tests, auth browser checks, and production build pass. Record checks actually run; real provider access is required for full acceptance.
-- [ ] 2 — Food and Today (authorized; source prepared, integration verification pending): quick entry and reusable nutrition, saved meals, create/edit/delete/copy/recent workflows, diary completion, and real daily nutrition cards.
+- [ ] 2 — Food and Today (user review passed; automated SQL/browser verification pending): quick entry and reusable nutrition, saved meals, create/edit/delete/copy/recent workflows, diary completion, and real daily nutrition cards.
   - Label-based scaling is correct; nutrition snapshots preserve history; zero values are accepted while invalid quantities/numbers are rejected.
   - Totals update across views and after reload. Above-target intake displays the real amount over; incomplete or missing logs are clearly distinguished.
   - Duplicate submissions are safe. Editing a completed diary marks it incomplete atomically; copies are independent records.
   - Historical target/date-boundary tests, cross-account tests, food browser flows, failed-save/input-retention checks and standard project checks pass.
-- [ ] 3 — Training: initial editable two-week routine, prescription snapshots, sessions, set logging, rest timer, resume, cardio and Today activity.
+- [ ] 3 — Training (source prepared; migration/provider review pending): initial editable two-week routine, prescription snapshots, sessions, set logging, rest timer, resume, cardio and Today activity.
   - Start/resume/complete/skip statuses remain distinct across reload; unfinished sets stay unfinished. Variations, per-side reps and previous performance are clear.
   - A backgrounded timer calculates from its persisted deadline; do not claim a background alarm. Routine changes preserve previous sessions.
   - Manual walking records and discomfort notes persist. Browser workflows, ownership and duplicate-session checks, timer/domain tests and project checks pass.
@@ -76,17 +76,18 @@ Create only the tables needed by the approved milestone. Use transactions/databa
   - HTTPS production configuration, redirects, environment separation, backups and deployment instructions are documented. No automatic offline writes or private-response caching.
   - Verify installation and online save errors; distinguish actual Safari/iPhone checks from emulation. Full relevant checks and production build pass before release is called ready.
 
-Milestone 1 is the proposed first implementation milestone. Split it into a smaller reviewed slice if provider setup or auth scope prevents a coherent review. Every milestone ends with a PROGRESS.md update and user review; no automatic advancement.
+Milestones 1 and 2 passed user review. Milestone 3 source is prepared and awaits database/integration review. Every milestone ends with a PROGRESS.md update and user review; no automatic advancement.
 
 ## Blockers and next action
 
 1. The authorized working directory is `/Users/hassanainaljazzar/Documents/ChatGPT/Hagen`, now GitHub-backed by the user's `OMEX32/hagen-dev` repository. Planning files were copied here from the staged Codex workspace. No further Desktop move is needed.
 2. User has deployed to Vercel, connected Supabase, applied the foundation migration, configured the app/email redirect origins, and confirmed onboarding, persistence, sign-out/re-login, and password recovery. These are user-observed results; automated provider/session-expiry and two-account foundation checks remain outstanding.
-3. Milestone 2 implementation is prepared. Apply **only** `supabase/migrations/202610180002_food.sql` to the existing development project, then publish the source update through the user's GitHub/Vercel workflow. No food migration, commit, push, or deployment has been executed by the agent.
-4. Type check, lint, 42 Vitest cases, 5 native-domain cases, and the supported webpack production build pass. Browser scenario discovery passes; actual browser execution is blocked by `listen EPERM 127.0.0.1:3100`. No real food database or physical phone check ran.
-5. Run `supabase/tests/food.sql` against a disposable test project with both migrations, and run the provider-backed Playwright flows with disposable accounts. The local Docker engine is stopped and test provider credentials are not configured in this workspace.
-6. Known development-only braces advisory and unsupported ESLint 9 remain documented in PROGRESS.md/README.md. Do not apply npm's forced downgrade or hide findings.
-7. Record provider/browser/user review results and keep milestone 2 open until its acceptance criteria pass. Milestone 3 training is not approved. Do not run `.next` type generation concurrently with a build.
+3. Milestone 2 Food/Today passed user review (“everything works”) after the migration/deployment instructions. Automated food SQL/browser verification still has not run.
+4. Milestone 3 was explicitly approved and its implementation is prepared. Apply only supabase/migrations/202610180003_training.sql to the existing development database, publish source through GitHub/Vercel, and save the starting routine in Training. No agent migration, commit, push, or deployment was performed.
+5. Type check, lint, 62 Vitest cases, 5 native-domain cases and the webpack build pass. Playwright discovers 10 scenarios; execution is blocked by listen EPERM on 127.0.0.1:3100. Never run .next type generation concurrently with a build.
+6. Run supabase/tests/training.sql in a disposable test project with all migrations, reconcile generated types, and run provider browser flows with documented fresh disposable A/B accounts. SQL suites, two-account results, browser rendering and physical-phone checks remain unverified. Local PostgreSQL/test-provider access is absent.
+7. Stop for milestone 3 database/user review. Do not implement milestone 4 automatically. Keep acceptance unchecked until relevant database/browser checks pass.
+8. Known development-only braces advisory and unsupported ESLint 9 remain documented; no dependency change is included. Do not force a lint downgrade or hide findings.
 
 ## Official references checked on 2026-10-18
 
@@ -94,5 +95,7 @@ Milestone 1 is the proposed first implementation milestone. Split it into a smal
 - https://supabase.com/docs/guides/auth/server-side/nextjs
 - https://supabase.com/docs/guides/integrations/vercel-marketplace
 - https://supabase.com/docs/guides/database/postgres/row-level-security
+- https://supabase.com/docs/guides/database/functions
+- https://www.postgresql.org/docs/18/plpgsql-control-structures.html
 
-Pin and verify actual dependencies at installation; this planning document does not claim that packages, provider integration, RLS policies, tests or a deployment already exist.
+Keep dependencies pinned and verify upgrades. Source, installed packages and local checks are distinguished above from user-observed deployment results and unrun automated provider acceptance.

@@ -1,0 +1,9 @@
+export type ActivityKind = "strength" | "walk" | "easy" | "rest";
+export type SessionStatus = "planned" | "in_progress" | "completed" | "skipped";
+export type DayRule = { weekday: number; kind: ActivityKind; minutes: number | null };
+export type ExercisePlan = { key: string; name: string; instructions: string; sets: number; reps_min: number; reps_max: number; per_side: boolean; variation: string };
+export type Routine = { id: string; user_id: string; effective_date: string; created_at: string; days: DayRule[]; exercises: ExercisePlan[] };
+export type TrainingSession = { id: string; user_id: string; diary_date: string; routine_id: string; kind: ActivityKind; planned_minutes: number | null; status: SessionStatus; started_at: string | null; completed_at: string | null; notes: string; effort: number | null; discomfort: string; rest_deadline: string | null; revision: number; created_at: string };
+export type SessionExercise = { id: string; user_id: string; session_id: string; position: number; exercise_key: string; prescription: ExercisePlan; variation: string; per_side: boolean; resistance: string; revision: number };
+export type WorkoutSet = { id: string; user_id: string; exercise_id: string; position: number; reps: number | null; reps_other: number | null; weight_kg: number | null; completed: boolean };
+export type CardioLog = { id: string; user_id: string; diary_date: string; session_id: string | null; kind: "walk" | "jog"; minutes: number; distance_km: number | null; effort: number | null; notes: string; discomfort: string; revision: number; created_at: string };

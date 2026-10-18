@@ -147,3 +147,34 @@ summary:focus-visible { border-radius:6px; }
 .meal-preview { margin-bottom:26px; }
 .migration-filename { display:block; overflow-wrap:anywhere; font-size:.8rem; margin-bottom:16px; padding:14px; background:#f0f3e9; border-radius:12px; }
 @media(max-width:400px) { .food-toolbar { gap:8px; } .food-toolbar .button { padding:12px 10px; font-size:.75rem; } .meal-editor-item { padding:14px; } .food-entry-heading { gap:8px; } }
+
+/* Training uses the same narrow, touch-friendly diary layout. */
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.status-pill { font-size: .8rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; color: var(--green); background: #eaf0e5; }
+.activity-title { font-size: 1.2rem; font-weight: 600; margin: 16px 0; }
+.training-list { list-style: none; padding: 0; margin: 0; }
+.training-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.training-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.training-list li p { margin: 6px 0 0; }
+.training-list .text-link { flex-shrink: 0; padding: 12px 0; }
+.routine-day, .set-row { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; gap: 16px; }
+.routine-day:first-child, .set-row:first-child { padding-top: 0; }
+.routine-day h3, .set-row h3 { margin: 0; }
+.form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.timer-display { font-variant-numeric: tabular-nums; font-size: 3.3rem; line-height: 1.1; margin: 22px 0 12px; }
+.timer-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.timer-controls .button { flex: 1; min-width: 110px; }
+.previous-performance { margin-bottom: 24px; border-block: 1px solid var(--line); padding: 10px 0; }
+.previous-performance summary { min-height: 44px; padding: 10px 0; }
+.prescription { color: var(--green); font-weight: 600; margin: 12px 0; }
+.preserve-lines { white-space: pre-wrap; overflow-wrap: anywhere; }
+.field textarea { width: 100%; min-height: 88px; resize: vertical; border: 1px solid #bcc9ba; border-radius: 12px; padding: 12px; color: var(--ink); background: white; font: inherit; }
+.checkbox-field { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 0; line-height: 1.5; }
+.checkbox-field input { width: 20px; height: 20px; flex: 0 0 20px; accent-color: var(--green); margin-top: 2px; }
+@media (max-width: 400px) {
+  .form-grid.three { grid-template-columns: 1fr; }
+  .training-list li { gap: 10px; }
+}
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.app-main h2, .activity-title, .training-list strong, .previous-performance { overflow-wrap: anywhere; }
+@media (max-width: 400px) { .form-grid { grid-template-columns: 1fr; } }

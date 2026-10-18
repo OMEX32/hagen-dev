@@ -2,9 +2,9 @@
 
 ## Current state — 2026-10-18
 
-Milestone 0 is accepted. The user has reviewed working milestone 1 account/profile/target/recovery flows and explicitly authorized milestone 2. Food source, migration, and test suites are prepared. Type check/lint, 42 Vitest cases, 5 native-domain cases, and the webpack production build pass. Food database migration and actual SQL/browser verification are still pending; do not call milestone 2 complete. Foundation automated isolation/session-expiry checks also remain outstanding.
+Milestones 1 and 2 passed user review of the deployed core flows. The user explicitly authorized milestone 3 with “lets start” on 2026-10-18. Training source, migration, unit/action tests, rollback SQL suite and browser scenarios are prepared. Type check/lint, 62 Vitest cases, 5 native-domain cases and the webpack build pass. Its hosted migration, PostgreSQL results, provider/browser execution and user review are pending; do not claim these unrun checks passed.
 
-Read PROJECT_PROMPT.md, PLAN.md, this file, and README.md before continuing. Preserve milestone review gates. Milestone 2 is authorized. Do not start training/progress features yet.
+Read PROJECT_PROMPT.md, PLAN.md, this file and README.md before continuing. Do not begin milestone 4 before milestone 3 review.
 
 ## Working directory and continuity
 
@@ -119,3 +119,45 @@ Audit triage is recorded below: the known development-only braces issue has no p
 4. Complete provider-backed browser checks and user review of logging/editing/deletion, Food/Today reload consistency, diary invalidation, meal copies, and immutable saved-food history. Keep milestone 2 unchecked until those checks pass. No milestone 3 work has begun.
 
 - Final read-path review added paginated food/library reads to avoid truncating totals at the provider row cap, and limits target lookup to the most recent version effective on the selected day. Added two pagination/failure tests; 42 Vitest + 5 native tests now pass. Food mutations explicitly revalidate Today, Food, and the library.
+
+## Milestone 2 user review passed — 2026-10-18, 17:44 Europe/Brussels
+
+- After the food migration and source-push/deployment instructions, the user reports “everything works.” Record this as a passed user review of the deployed Food/Today functionality; exact individual scenarios were not separately enumerated by the user.
+- The agent did not independently apply or inspect the hosted migration, deployment, or food records. Automated SQL ownership/atomicity and browser scenarios remain unrun, with the earlier environment limitations unchanged.
+- No implementation changes or additional tests were needed for this acknowledgement.
+- Next proposed milestone is 3: editable initial routine, dated workout sessions, actual set logging, timestamp-based rest timer, interruption/resume, manual walking/cardio, and Today activity. Await explicit authorization before implementing training.
+
+## Milestone 3 authorized and source prepared — 2026-10-18
+
+- User said “lets start” after confirming Food/Today worked. This explicitly approves training; prior waiting-for-authorization notes above are historical.
+- Added training/routine/session/cardio routes and enabled Training navigation. Settings links to routine editing; Today uses the same selected-date plan/status and actual movement records.
+- Preserved the beginner week and five exercises, with editable future weekday rules, sets/reps, variations, instructions and per-side convention. Saturday defaults to 25 minutes with the 25–30 range explained. Warm-up, rest, reps-in-reserve and starting-with-one-set guidance remain visible.
+- Added 202610180003_training.sql: immutable effective-dated routine versions, one owner/date session with materialized exercise/set snapshots, manual cardio and private payload-bound receipts. Reads use RLS; direct authenticated writes are revoked. The RPC derives identity, enforces owned links/statuses, serializes writes and atomically commits multi-row work and receipts.
+- Opening is explicit; future dates are preview-only; dates before the routine have no fabricated schedule. Later versions preserve opened sessions. Same-date versions resolve by date, precise timestamp and UUID, including sub-millisecond ordering.
+- Actual sets record reps by side where chosen, weight, resistance, variation and explicit completion. Finishing leaves partial sets unfinished. Start/finish/skip/reopen remain distinct. Previous performance is labelled as the prior completed strength session.
+- Notes/effort/discomfort save independently. Closed records require reopening. Optimistic revisions and stale-draft checks reject conflicting overwrites. Unknown and explicitly saved zero remain distinct.
+- Rest uses persisted server deadlines and timestamp calculations after ticks, visibility change and page return. Retries retain the deadline. Finish/skip clears rest; no background alarm is promised.
+- Scheduled walking requires actual duration before completion, has one linked record and never adds planned minutes to actual totals. Extra walking/jogging has edit/delete, optional distance/effort, notes/discomfort; no GPS or calorie-burn estimate.
+- Added account/form-scoped tab sessionStorage drafts, cleared on save/login. Failed saves retain values without fake success. Save each form before finishing; unsent input is not a diary record or offline queue.
+- Shared pagination lives in src/lib/read-pages.ts with a Food compatibility re-export; food tests pass. Field/Select support unique IDs for repeated forms.
+- No dependency, environment, infrastructure or later-milestone feature was added. Types remain hand-authored pending generation from the applied database.
+
+### Verification actually run for milestone 3
+
+- npm run typecheck: pass.
+- npm run lint: pass, zero warnings.
+- npm test: 62 passing tests. New checks cover beginner plan/date/revision ordering, partial/per-side/zero validation, timestamp timers, cardio input, owner-input stripping, missing/failed saves, conflicting revisions and expired-session control flow.
+- npm run test:domain: 5 passing tests.
+- npm run build -- --webpack: pass, sequentially after type generation.
+- npm run test:e2e -- --list: discovers 10 scenarios across mobile Chromium/WebKit.
+- npm run test:e2e -- --project=mobile-chromium: blocked before launch by listen EPERM 127.0.0.1:3100. No browser/physical-phone result is claimed.
+- supabase/tests/training.sql: prepared, NOT executed. Covers retries, changed requests, unique sessions, partial/per-side sets, multi-row rollback, stale revisions, timer/retry, explicit states, unchanged snapshots, cardio CRUD/completion and linked uniqueness, cross-account reads/mutations/attachments, composite FKs, anonymous denial and account deletion. A disposable PostgreSQL/Supabase project is required.
+- No hosted migration, generated types, independent user-data inspection, git commit/push or deployment was performed. Existing foundation/food automated provider gaps remain open.
+
+### Next action and review gate
+
+1. Apply only the new training migration once in the existing development SQL Editor; README has the Mac pbcopy command. Keep existing Auth/profile/target/food data.
+2. Review/commit/push and wait for the GitHub-linked Vercel deployment. No new environment variable is needed.
+3. Open Training and explicitly save the routine. Review actual/per-side/variation saves, refresh/re-login/resume, background timer, notes/discomfort, unfinished sets after completion, skip/reopen, walking and future edits preserving today.
+4. Run the rollback SQL suite and provider browser scenarios in a disposable project. Training browser tests seed all-strength A/all-walk B; use fresh accounts for unrelated routines or a new test date. Record results and reconcile generated types.
+5. Stop for milestone 3 acceptance. Progress remains unavailable until separately authorized.

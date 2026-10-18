@@ -41,21 +41,21 @@ export function ManagedForm({ action, children, submitLabel, pendingLabel = "Sav
   </form>;
 }
 
-export function Field({ name, label, help, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { name: string; label: string; help?: string }) {
+export function Field({ name, label, help, id = name, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { name: string; label: string; help?: string }) {
   const errors = useContext(Errors)?.[name];
-  const ids = [help && `${name}-help`, errors?.length && `${name}-error`].filter(Boolean).join(" ") || undefined;
+  const ids = [help && `${id}-help`, errors?.length && `${id}-error`].filter(Boolean).join(" ") || undefined;
   return <div className="field">
-    <label htmlFor={name}>{label}</label>
-    <input {...props} id={name} name={name} aria-describedby={ids} aria-invalid={errors?.length ? true : undefined} />
-    {help && <p className="field-help" id={`${name}-help`}>{help}</p>}
-    {!!errors?.length && <p className="field-error" id={`${name}-error`}>{errors[0]}</p>}
+    <label htmlFor={id}>{label}</label>
+    <input {...props} id={id} name={name} aria-describedby={ids} aria-invalid={errors?.length ? true : undefined} />
+    {help && <p className="field-help" id={`${id}-help`}>{help}</p>}
+    {!!errors?.length && <p className="field-error" id={`${id}-error`}>{errors[0]}</p>}
   </div>;
 }
 
-export function SelectField({ name, label, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { name: string; label: string }) {
+export function SelectField({ name, label, children, id = name, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { name: string; label: string }) {
   const errors = useContext(Errors)?.[name];
-  return <div className="field"><label htmlFor={name}>{label}</label>
-    <select {...props} id={name} name={name} aria-invalid={errors?.length ? true : undefined} aria-describedby={errors?.length ? `${name}-error` : undefined}>{children}</select>
-    {!!errors?.length && <p className="field-error" id={`${name}-error`}>{errors[0]}</p>}
+  return <div className="field"><label htmlFor={id}>{label}</label>
+    <select {...props} id={id} name={name} aria-invalid={errors?.length ? true : undefined} aria-describedby={errors?.length ? `${id}-error` : undefined}>{children}</select>
+    {!!errors?.length && <p className="field-error" id={`${id}-error`}>{errors[0]}</p>}
   </div>;
 }

@@ -2,7 +2,7 @@
 
 Private, mobile-first fitness diary built with Next.js App Router, React, strict TypeScript, Tailwind, and Supabase Auth/PostgreSQL.
 
-Milestones 1 and 2 source and installed dependencies are present. The user has deployed the foundation to Vercel and confirmed onboarding, persistence, and password recovery. Food integration and full automated acceptance are still pending; this is not a verified finished app. Both provider projects were created from scratch. Read `PROJECT_PROMPT.md`, `PLAN.md`, and `PROGRESS.md` before continuing. Later milestones require review before implementation.
+Milestones 1 and 2 passed user review on the deployed app. Milestone 3 training source, migration, and tests are prepared after explicit approval; its database update and provider review are pending. Independent automated provider acceptance remains outstanding. Both Vercel and Supabase projects were created from scratch. Read `PROJECT_PROMPT.md`, `PLAN.md`, and `PROGRESS.md` before continuing. Later milestones require review before implementation.
 
 ## Run locally
 
@@ -53,7 +53,7 @@ Vercel's Next.js framework detection needs no custom adapter or static export. F
 
 - `/login`: email/password registration and sign-in; `/forgot-password` and `/update-password`: provider password recovery through `/auth/callback`.
 - `/onboarding`: explicit confirmation of profile and provisional targets, saved in one database transaction. The approximate starting weight remains an assumption, never a weigh-in.
-- `/today`: protected mobile shell and real saved targets for the selected diary date. No intake totals, remaining calories, or completed workouts are fabricated. Later tabs are visibly unavailable.
+- `/today`: protected mobile shell and real saved targets for the selected diary date. No intake totals, remaining calories, or completed workouts are fabricated. Training is enabled by milestone 3; Progress remains unavailable.
 - `/settings`: editable profile, future targets, dated target history, and sign-out. Changing profile inputs does not recalculate targets.
 - Initial target values: 2,600 kcal estimated maintenance, 500 kcal requested deficit, 2,100 kcal food, 140 g protein. All are editable; manual food overrides are labelled. These are assumptions, not a measured deficit or a clinical prescription.
 - Targets resolve by the latest effective date on or before the requested day in the configured timezone. Updates start tomorrow or later. A second save for the same future date replaces that scheduled target, preserving historical days. Successful requests retain private receipts so delayed retries cannot undo later edits.
@@ -102,7 +102,7 @@ npm run test:e2e
 node --env-file=.env.test node_modules/@playwright/test/cli.js test
 ```
 
-Without test provider values, the first run checks the setup screen, protected-route behavior, and 360 px overflow. With `.env.test`, the second run checks real sign-in, onboarding if necessary, profile persistence, failed-save input retention, sign-out, protected access, and re-login. It writes only to disposable test account A. Use the database-tested account or another disposable account; the browser flow accepts an existing test profile. Test account credentials are never embedded in source, screenshots, traces, or videos.
+Without test provider values, the first run checks the setup screen, protected-route behavior, and 360 px overflow. With `.env.test`, the second run checks real sign-in, onboarding if necessary, profile persistence, failed-save input retention, sign-out, protected access, and re-login. Foundation/Food write to disposable account A; Training also uses B, as described below. Use the database-tested account or another disposable account; the browser flow accepts an existing test profile. Test account credentials are never embedded in source, screenshots, traces, or videos.
 
 Email confirmation/recovery, auth expiry/refresh, target scheduling in the browser, and a real Safari/iPhone check still require explicit verification; existing browser scenarios do not prove those paths. WebKit phone emulation is not a physical iPhone test. Full milestone 1 acceptance requires the provider-backed checks and `npm run check` to pass.
 
@@ -118,12 +118,12 @@ supabase/migrations/     Versioned SQL foundation
 tests/                   Domain, validation, database, and browser checks
 ```
 
-Milestone 2 food code is prepared; apply its migration and complete integration verification before calling it accepted. Training, progress, backup/restore, and PWA features remain unimplemented.
+Food/Today passed user review. Training source is prepared below; database/browser acceptance is pending. Progress, backup/restore, and PWA features remain unimplemented.
 
 
 ## Milestone 2: food diary and nutrition summaries
 
-The user authorized milestone 2 on 2026-10-18 after confirming foundation save/re-login and password recovery. Food code is prepared, but the new migration and real provider/browser checks are not yet verified. Do not begin training automatically.
+The user authorized milestone 2 on 2026-10-18 after confirming foundation save/re-login and password recovery. The user reports Food/Today works after the migration and deployment instructions. The following setup steps remain for fresh checkouts; independent provider/browser checks remain pending. Training was subsequently authorized explicitly.
 
 ### Apply the food database update
 
@@ -181,6 +181,82 @@ npm run build -- --webpack
 node --env-file=.env.test node_modules/@playwright/test/cli.js test
 ```
 
-The authoring session passes type checking, lint, 42 Vitest cases, 5 native-domain cases, and the supported webpack production build. Playwright discovers all 6 configured browser scenarios, but execution is blocked by `listen EPERM 127.0.0.1:3100` before opening a browser. No mobile layout, physical iPhone, real food database write, or two-account SQL result was verified by the agent. Default Turbopack is separately blocked by the same session port restriction. Do not run type generation and build concurrently because both write `.next`.
+At the milestone 2 handoff, the authoring session passed type checking, lint, 42 Vitest cases, 5 native-domain cases, and the supported webpack production build. Playwright discovers all 6 configured browser scenarios, but execution is blocked by `listen EPERM 127.0.0.1:3100` before opening a browser. No mobile layout, physical iPhone, real food database write, or two-account SQL result was verified by the agent. Default Turbopack is separately blocked by the same session port restriction. Do not run type generation and build concurrently because both write `.next`.
 
-For user review after deployment: log a real label/quick entry, compare Food and Today, refresh, mark a diary complete, edit one entry and confirm it reopens, reuse/copy a meal, edit a saved definition and confirm previous logs stay unchanged. Record results in PROGRESS.md and stop for milestone 2 acceptance.
+For user review after deployment: log a real label/quick entry, compare Food and Today, refresh, mark a diary complete, edit one entry and confirm it reopens, reuse/copy a meal, edit a saved definition and confirm previous logs stay unchanged. Milestone 2 user review subsequently passed; automated provider checks remain pending. Record additional results in PROGRESS.md.
+
+## Milestone 3: training
+
+Training was authorized by the user’s “lets start” on 2026-10-18. Source is prepared for review, with no agent-applied hosted migration, commit, push, or deployment. Full acceptance requires working database flows and user review.
+
+### Enable Training in your existing app
+
+1. Keep the existing foundation and food migrations. Apply **only** the new migration once, as a complete script, in your existing development Supabase project’s **SQL Editor → New query → Run**:
+
+   ```sh
+   pbcopy < /Users/hassanainaljazzar/Documents/ChatGPT/Hagen/supabase/migrations/202610180003_training.sql
+   ```
+
+   This adds training tables/functions and preserves existing Auth, profile, target and food data. If it errors, inspect the error before retrying. Do not rerun either earlier migration.
+
+2. Review and publish through your existing GitHub/Vercel workflow:
+
+   ```sh
+   git add src tests supabase README.md PLAN.md PROGRESS.md
+   git commit -m "Add training routines and workout logging"
+   git push
+   ```
+
+   Inspect generated next-env.d.ts changes separately. No new environment variable or service is required. Wait for Vercel deployment success, then reload.
+
+3. Open **Training → Set up your routine**, review the prefilled week/exercises, and save. The first version can begin today; further revisions begin tomorrow or later. Routine creation never invents completed exercise records.
+
+### Behavior and data decisions
+
+- Training shows a selected day and two-week schedule preview. The initial week repeats: Monday/Thursday strength; Tuesday/Wednesday 20-minute walks; Friday easy; Saturday 25-minute walk (editable to 30); Sunday rest/gentle movement.
+- Strength keeps the five prescribed exercises, five-minute warm-up, 60–90-second rest, two or three reps in reserve and starting with one set. Edit names, instructions, planned sets/reps, starting variations and per-side convention, as well as weekday activities/minutes.
+- Immutable effective-dated routine versions contain ordered JSON prescriptions. A later revision on the same effective date wins for unopened sessions. A revision scheduled for a later date still takes over then. The editor identifies the latest saved version; date/fortnight views resolve the version effective on each date.
+- Explicitly opening creates one unique owner/date session and materializes independent exercise/set snapshots. GET requests create no records. Future dates are preview-only; dates before the first routine have no plan. Opened sessions retain their prescription when later versions change.
+- Start, finish, skip and confirmed reopen are explicit transitions. Save actual reps, optional weight, resistance description, performed variation and per-side convention. Completed per-side sets require both counts. Unknown reps remain null; zero is explicit. Finishing never marks unfinished sets done.
+- Previous performance is labelled as the previous completed strength session, showing actually recorded variation, reps by side, weights and completion. Missing performance is stated.
+- Notes, optional effort and discomfort persist. Closed sessions require confirmed reopening before edits. Optimistic revisions reject conflicting exercise/note/status/cardio edits. Stale tab drafts require review/discard before saving.
+- A server-generated rest deadline persists. The visible timer recalculates from timestamps on ticks, visibility changes, refresh and page return. No background alarm is promised. Duplicate timer retries retain the original deadline. Finish/skip clears rest.
+- Walking/jogging logs have actual minutes, optional distance/effort, notes/discomfort and edit/delete. A scheduled walk requires saved actual duration before completion. Its one linked cardio record is counted once; planned minutes are never added. Additional unlinked movement is explicitly separate. No GPS/wearables or calorie-burn estimates.
+- Today shows the same dated activity status and recorded movement. Settings links to future-routine editing. Food works while the training migration is absent; Training shows a migration notice.
+- Writes derive ownership from verified authentication and auth.uid(), serialize per owner, and atomically commit changes with payload-bound receipts. Public tables allow owner-only reads and no direct authenticated writes. Composite owner foreign keys protect routine/session/exercise/cardio links. No admin key is used.
+- Unsent inputs stay in this tab’s account/form-scoped sessionStorage and clear after save or on login. Save each form explicitly; finishing does not submit other forms. Tab input is neither an offline write queue nor a saved diary record.
+
+### Training verification
+
+Run standard checks sequentially; type generation and build both write .next:
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run test:domain
+npm run build -- --webpack
+npm run test:e2e -- --list
+```
+
+Current results: type check, lint, 62 Vitest tests, 5 native domain tests and the webpack production build pass. Playwright discovers 10 scenarios across mobile Chromium/WebKit. Actual execution is blocked before browser launch by listen EPERM on 127.0.0.1:3100; no rendered mobile or physical-iPhone verification is claimed.
+
+Apply all three migrations in a **disposable Supabase test project**, then run the entire supabase/tests/training.sql there. With psql, use the command below against that test database:
+
+```sh
+psql -v ON_ERROR_STOP=1 -f supabase/tests/training.sql
+```
+
+It uses synthetic accounts in one rollback transaction to test retries, changed-payload rejection, unique sessions, atomic partial-set saves, per-side validation, stale revisions, timer deadlines/retries, complete/skip/reopen, unchanged snapshots, walking CRUD and linked-log uniqueness, account read/write/attachment isolation, owner FKs, anonymous denial and account deletion. This SQL suite has **not run** here: no test provider or local PostgreSQL service is available. Generate and reconcile actual database types after migration; the checked-in contract remains hand-authored.
+
+Provider browser tests:
+
+```sh
+node --env-file=.env.test node_modules/@playwright/test/cli.js test
+```
+
+Use all migrations, HAGEN_ALLOW_TEST_WRITES=true and confirmed disposable A/B credentials. Training seeds an all-strength routine for A and all-walk routine for B when each has no routine. Existing profiles are accepted; unrelated existing routines are unsuitable. Use fresh accounts for a new test date; same-date reruns can reuse the seeded accounts. Browser records remain for inspection; delete the disposable Auth accounts afterward. The foundation database script independently requires fresh accounts and refuses existing profiles.
+
+Training scenarios cover save/retry/input retention, per-side set persistence after reload, Today resume, persisted timer refresh/simulated elapsed time, notes/discomfort, complete/reopen/skip, sign-out/re-login, walking duration, routine changes preserving a session, extra movement CRUD and phone-width overflow. These are prepared tests, not passing provider results.
+
+User review: save the routine; start strength; save reps and a variation; refresh/resume; start a timer and background/return; finish with an unchecked set and verify it remains unfinished; reopen/skip and check Today; log walking/discomfort and verify after re-login; edit tomorrow’s routine and verify today’s prescription is unchanged. Stop for milestone 3 review before Progress.
